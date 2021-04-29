@@ -268,9 +268,12 @@ class TpN:
         self.Triangle.get_isonumbs()
         if len(self.Triangle.sample_list) > 1:
             self.Triangle.calculate_mean_ratios()
+            mean_ratios = True
+        else:
+            mean_ratios = False
         self.Triangle.calculate_biases()
         self.Triangle.calculate_mean_biases()
-        self.Triangle.export_results(self.run_name, self.home)
+        self.Triangle.export_results(self.run_name, self.home, mean_ratios)
 
         self.metabolite_choice = widgets.SelectMultiple(options=self.Triangle.metabolite_list,
                                                         description="Metabolites",
@@ -313,6 +316,8 @@ class TpN:
             indices = [i for i, x in enumerate(val_thr) if x]  # Get isotopologues where we are over threshold
 
             try:
+                self.logger.debug(f"value options = {val_opt}")
+                self.logger.debug(f"key options = {key_opt}")
                 self.dropdown_list.append(widgets.SelectMultiple(options=val_opt,
                                                                  value=list(itemgetter(*indices)(val_opt)),
                                                                  description=key_opt, disabled=False))
@@ -320,7 +325,11 @@ class TpN:
             # the metabolite for which it happened
             except TypeError:
                 with self.plot_out:
-                    self.logger.info(f"Experimental data missing for {key_opt}")
+                    self.logger.warning(f"Experimental data missing for {key_opt}")
+                continue
+            except Exception:
+                with self.plot_out:
+                    self.logger.exception(f"Error while calculating for {key_opt}")
                 continue
 
         # Split in half for more clarity in the notebook (two columns of selection widgets)
@@ -348,11 +357,18 @@ class TpN:
         # We loop on widgets for simplicity. Filtering is done using metadata from each widget
 
         self.plot_dfs.clear()
+        self.plot_out.clear_output()
+
         for widget in self.dropdown_list:
             tmp_df = self.Triangle.df_ready[(self.Triangle.df_ready["sample"] == self.Triangle.sample_list[0]) &
                                             (self.Triangle.df_ready["metabolite"] == widget.description) &
                                             (self.Triangle.df_ready["isotopologue"].isin(list(widget.value)))]
             self.plot_dfs.append(tmp_df)
+
+            if self.errorbars.value:
+                yerr = tmp_df.Mean_Ratios_SD
+            else:
+                yerr = None
 
             with self.plot_out:
                 fig, ax = plt.subplots()
@@ -360,7 +376,7 @@ class TpN:
                                   tmp_df.Ratio,
                                   tmp_df.Theoretical_Ratios,
                                   tmp_df.isotopologue,
-                                  ax=ax, yerr=tmp_df.Mean_Ratios_SD)
+                                  ax=ax, yerr=yerr)
                 plt.show()
 
         with self.plot_out:
