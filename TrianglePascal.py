@@ -15,6 +15,8 @@ class TPascal:
 
         :param verbose: True if debug log should be given
         :type verbose: Boolean
+        :param threshold_value: Value of the threshold
+        :type threshold_value: float
         """
 
         self.threshold_value = threshold_value
