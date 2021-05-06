@@ -12,7 +12,7 @@ import matplotlib.pyplot as plt
 from matplotlib.backends.backend_pdf import PdfPages
 import numpy as np
 
-from TrianglePascal import TPascal
+from MSPT.TrianglePascal import TPascal
 
 
 # noinspection PyTypeChecker
@@ -22,6 +22,7 @@ class TpN:
 
         # Initialize child logger for class instances
         self.logger = logging.getLogger("TrianglePascal.notebook.TpNotebook")
+
         # fh = logging.FileHandler(f"{self.run_name}.log")
         handler = logging.StreamHandler()
         if verbose:
