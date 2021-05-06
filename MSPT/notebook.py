@@ -245,7 +245,7 @@ class TpN:
             return f"No file loaded in {button}"
 
         data_content = button.value[data]['content']
-        with open('myfile', 'wb') as f:
+        with open('../myfile', 'wb') as f:
             f.write(data_content)
         try:
             real_data = pd.read_csv(io.BytesIO(data_content), sep="\t")
