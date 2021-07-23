@@ -143,11 +143,12 @@ class TpN:
             for rect in rects:
                 height = rect.get_height()
                 ax.annotate('{}'.format(round(height, 2)),
-                            xy=(rect.get_x() + rect.get_width() / 2, height - (height/90)),
+                            xy=(rect.get_x() + rect.get_width() / 2, height - (height / 90)),
                             xytext=(0, 3),  # 3 points vertical offset
                             textcoords="offset points",
                             ha='center', va='bottom',
                             fontsize="xx-small")
+
         if yerr is not None:
             autolabel(rects1)
             autolabel(rects2)
@@ -171,10 +172,10 @@ class TpN:
             fig, ax = plt.subplots()
             fig.set_size_inches([5, 4])
             TpN._build_axes(list(df1.metabolite)[0],
-                              df1.Ratio,
-                              df1.Theoretical_Ratios,
-                              df1.isotopologue,
-                              ax=ax, yerr=yerr1)
+                            df1.Ratio,
+                            df1.Theoretical_Ratios,
+                            df1.isotopologue,
+                            ax=ax, yerr=yerr1)
         else:
             if yerr:
                 yerr1 = df1.Mean_Ratios_SD
@@ -185,17 +186,17 @@ class TpN:
             fig, (ax1, ax2) = plt.subplots(nrows=2)
             fig.set_size_inches([5, 4])
             TpN._build_axes(list(df1.metabolite)[0],
-                              df1.Ratio,
-                              df1.Theoretical_Ratios,
-                              df1.isotopologue,
-                              ax=ax1, yerr=yerr1)
+                            df1.Ratio,
+                            df1.Theoretical_Ratios,
+                            df1.isotopologue,
+                            ax=ax1, yerr=yerr1)
             TpN._build_axes(list(df2.metabolite)[0],
-                              df2.Ratio,
-                              df2.Theoretical_Ratios,
-                              df2.isotopologue,
-                              ax=ax2, yerr=yerr2)
-            ax1.legend(prop={'size':"x-small"})
-            ax2.legend(prop={'size':"x-small"})
+                            df2.Ratio,
+                            df2.Theoretical_Ratios,
+                            df2.isotopologue,
+                            ax=ax2, yerr=yerr2)
+            ax1.legend(prop={'size': "x-small"})
+            ax2.legend(prop={'size': "x-small"})
             fig.tight_layout()
         return fig
 
@@ -330,10 +331,10 @@ class TpN:
             with self.plot_out:
                 fig, ax = plt.subplots()
                 TpN._build_axes(widget.description,
-                                  tmp_df.Ratio,
-                                  tmp_df.Theoretical_Ratios,
-                                  tmp_df.isotopologue,
-                                  ax=ax, yerr=yerr)
+                                tmp_df.Ratio,
+                                tmp_df.Theoretical_Ratios,
+                                tmp_df.isotopologue,
+                                ax=ax, yerr=yerr)
                 plt.show()
         with self.plot_out:
             display(self.save_plots_btn)
@@ -350,11 +351,11 @@ class TpN:
             fig = TpN._build_figure(df1, df2, yerr=self.errorbars.value)
             figures.append(fig)
 
-        def last_df(dfs1, dfs2):
-            if len(dfs1) > len(dfs2):
-                return dfs1[-1]
-            elif len(dfs1) < len(dfs2):
-                return dfs2[-1]
+        def last_df(dfs_1, dfs_2):
+            if len(dfs_1) > len(dfs_2):
+                return dfs_1[-1]
+            elif len(dfs_1) < len(dfs_2):
+                return dfs_2[-1]
 
         if len(dfs1) != len(dfs2):
             last_df = last_df(dfs1, dfs2)
@@ -364,4 +365,3 @@ class TpN:
             for fig in figures:
                 pdf.savefig(fig)
         os.chdir(self.home)
-
