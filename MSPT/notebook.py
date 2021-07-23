@@ -22,7 +22,6 @@ class TpN:
 
         # Initialize child logger for class instances
         self.logger = logging.getLogger("TrianglePascal.notebook.TpNotebook")
-
         # fh = logging.FileHandler(f"{self.run_name}.log")
         handler = logging.StreamHandler()
         if verbose:
@@ -34,54 +33,43 @@ class TpN:
         handler.setFormatter(formatter)
         if not self.logger.hasHandlers():
             self.logger.addHandler(handler)
-
         self.home = Path(os.getcwd())
         self.run_name = None
-
         # Initialize Pascal's Triangle object
         self.Triangle = TPascal(False)
-
         # Initialize all the widgets
         self.text = widgets.Text(value="",
                                  description="Run Name",
                                  disabled=False,
                                  placeholder="")
-
         self.errorbars = widgets.Checkbox(value=False, description="Plot Mean Ratios", disabled=False, indent=False)
-
         self.upload_data_btn = widgets.FileUpload(accept='',
                                                   multiple=False,
                                                   description='Upload Isocor Data')
-
         self.submit_btn = widgets.Button(description='Submit data',
                                          button_style='',
                                          tooltip='Click to submit selection',
                                          icon='')
-
         self.make_plots_btn = widgets.Button(description='Generate plots',
                                              button_style='',
                                              tooltip='Click to submit selection',
                                              icon='')
-
         self.metabolite_choice_btn = widgets.Button(description='Submit Metabolites',
                                                     button_style='',
                                                     tooltip='Click to submit selection',
                                                     icon='')
-
         self.save_plots_btn = widgets.Button(description="Save plots")
-
+        # Initialize outputs
         self.out = widgets.Output()
         self.metselect_out = widgets.Output()
         self.plot_out = widgets.Output()
-
         # Initialize extras
         self.dropdown_list = []
         self.plot_dfs = []
         self.export_figures = []
-
         self.dropdown_options = {}
         self.in_threshold = {}
-
+        # Initialize button click event
         self.metabolite_choice_btn.on_click(self._build_dropdowns)
 
     def reset(self, verbose):
@@ -113,19 +101,15 @@ class TpN:
         """
         Method for splitting the dfs in two for plotting each subplot of the pdf pages
 
-        :param dfs:
-        :return:
         """
 
         df1, df2 = [], []
-
         while dfs:
             try:
                 df1.append(dfs.pop(0))
                 df2.append(dfs.pop(0))
             except IndexError:
                 break
-
         return df1, df2
 
     @staticmethod
@@ -142,14 +126,12 @@ class TpN:
         :param yerr:
         :return:
         """
-        x = np.arange(len(labels))
 
+        x = np.arange(len(labels))
         if ax is None:
             plt.gca()
-
         rects1 = ax.bar(x - width / 2, real, width, label="Experimental", yerr=yerr)
         rects2 = ax.bar(x + width / 2, theory, width, label="Theory", yerr=yerr)
-
         ax.set_ylabel("Recorded Area")
         ax.set_title(f"{metabolite}")
         ax.set_xticks(x)
@@ -166,10 +148,9 @@ class TpN:
                             textcoords="offset points",
                             ha='center', va='bottom',
                             fontsize="xx-small")
-        if not yerr is None:
+        if yerr is not None:
             autolabel(rects1)
             autolabel(rects2)
-
         return rects1, rects2
 
     @staticmethod
@@ -203,24 +184,19 @@ class TpN:
 
             fig, (ax1, ax2) = plt.subplots(nrows=2)
             fig.set_size_inches([5, 4])
-
             TpN._build_axes(list(df1.metabolite)[0],
                               df1.Ratio,
                               df1.Theoretical_Ratios,
                               df1.isotopologue,
                               ax=ax1, yerr=yerr1)
-
             TpN._build_axes(list(df2.metabolite)[0],
                               df2.Ratio,
                               df2.Theoretical_Ratios,
                               df2.isotopologue,
                               ax=ax2, yerr=yerr2)
-
             ax1.legend(prop={'size':"x-small"})
             ax2.legend(prop={'size':"x-small"})
-
             fig.tight_layout()
-
         return fig
 
     def initialize_widgets(self):
@@ -243,7 +219,6 @@ class TpN:
             data = next(iter(button.value))
         except StopIteration:
             return f"No file loaded in {button}"
-
         data_content = button.value[data]['content']
         with open('../myfile', 'wb') as f:
             f.write(data_content)
@@ -260,7 +235,6 @@ class TpN:
         """Submit data event for submit button click"""
 
         self.run_name = self.text.value
-
         self.Triangle.data = self._get_data(self.upload_data_btn)
         self.Triangle.data = self.Triangle.data[["sample", "metabolite", "area"]]
         self.Triangle.data["ID"] = list(zip(self.Triangle.data["sample"], self.Triangle.data["metabolite"]))
@@ -275,16 +249,13 @@ class TpN:
         self.Triangle.calculate_biases()
         self.Triangle.calculate_mean_biases()
         self.Triangle.export_results(self.run_name, self.home, mean_ratios)
-
         self.metabolite_choice = widgets.SelectMultiple(options=self.Triangle.metabolite_list,
                                                         description="Metabolites",
                                                         value=[self.Triangle.metabolite_list[0]],
                                                         disabled=False)
-
         with self.metselect_out:
             display(self.metabolite_choice,
                     self.metabolite_choice_btn)
-
         self.Triangle.logger.info("Done processing data")
 
     def _build_dropdowns(self, event):
@@ -292,30 +263,22 @@ class TpN:
 
         # Prepare to clear output if receives new event from metabolite choice button
         self.out.clear_output()
-
         # Re-initialize so that when button is pressed once more the dropdowns are refreshed with new widget count
         self.dropdown_options = {}
         self.in_threshold = {}
         self.dropdown_list = []
-
         tmp_df = self.Triangle.df_ready[self.Triangle.df_ready["sample"] == self.Triangle.sample_list[0]]
-
         for metabolite in self.metabolite_choice.value:
             tmp_df_2 = tmp_df[tmp_df["metabolite"] == metabolite]
-
             # Not 1 to len +1 because isotopologues start from 0
             options = ["M" + str(n) for n in range(0, len(tmp_df_2.metabolite))]
             thresholds = [i for i in tmp_df_2.Thresholds]  # Boolean array where True is over 0.02
-
             self.dropdown_options.update({metabolite: options})
             self.in_threshold.update({metabolite: thresholds})
-
         # Generate selection widgets with metabolite names and isotopologues from dictionnary. We want to select ratio
         # values that are at least over 2% (ratio 0.02).
         for (key_opt, val_opt), (_, val_thr) in zip(self.dropdown_options.items(), self.in_threshold.items()):
-
             indices = [i for i, x in enumerate(val_thr) if x]  # Get isotopologues where we are over threshold
-
             try:
                 self.logger.debug(f"value options = {val_opt}")
                 self.logger.debug(f"key options = {key_opt}")
@@ -332,15 +295,12 @@ class TpN:
                 with self.plot_out:
                     self.logger.exception(f"Error while calculating for {key_opt}")
                 continue
-
         # Split in half for more clarity in the notebook (two columns of selection widgets)
         dropdowns1, dropdowns2 = TpN._half_list(self.dropdown_list)
-
         # Layout the widgets
         v_box1 = widgets.VBox(children=dropdowns1)
         v_box2 = widgets.VBox(children=dropdowns2)
         self.dropdowns = widgets.HBox(children=[v_box1, v_box2])
-
         with self.out:
             display(self.dropdowns,
                     self.make_plots_btn)
@@ -356,21 +316,17 @@ class TpN:
         """Event after clicking make plots to build the individual plots"""
 
         # We loop on widgets for simplicity. Filtering is done using metadata from each widget
-
         self.plot_dfs.clear()
         self.plot_out.clear_output()
-
         for widget in self.dropdown_list:
             tmp_df = self.Triangle.df_ready[(self.Triangle.df_ready["sample"] == self.Triangle.sample_list[0]) &
                                             (self.Triangle.df_ready["metabolite"] == widget.description) &
                                             (self.Triangle.df_ready["isotopologue"].isin(list(widget.value)))]
             self.plot_dfs.append(tmp_df)
-
             if self.errorbars.value:
                 yerr = tmp_df.Mean_Ratios_SD
             else:
                 yerr = None
-
             with self.plot_out:
                 fig, ax = plt.subplots()
                 TpN._build_axes(widget.description,
@@ -379,7 +335,6 @@ class TpN:
                                   tmp_df.isotopologue,
                                   ax=ax, yerr=yerr)
                 plt.show()
-
         with self.plot_out:
             display(self.save_plots_btn)
 
@@ -389,10 +344,8 @@ class TpN:
         if not os.path.exists(wd):
             wd.mkdir()
         os.chdir(wd)
-
         dfs1, dfs2 = TpN._parse_df_list(self.plot_dfs)
         figures = []
-
         for df1, df2 in zip(dfs1, dfs2):
             fig = TpN._build_figure(df1, df2, yerr=self.errorbars.value)
             figures.append(fig)
@@ -407,10 +360,8 @@ class TpN:
             last_df = last_df(dfs1, dfs2)
             fig = TpN._build_figure(last_df, yerr=self.errorbars.value)
             figures.append(fig)
-
         with PdfPages("Plots.pdf") as pdf:
             for fig in figures:
                 pdf.savefig(fig)
-
         os.chdir(self.home)
 
