@@ -24,6 +24,11 @@ downloaded from the `GitHub page <https://github.com/llegregam/PascalTriangle>`_
 
    installation.rst
    usage.rst
+
+.. toctree::
+   :maxdepth: 1
+   :caption: Librairy_doc:
+
    references.rst
 
 * :ref:`search`
