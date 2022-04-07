@@ -16,13 +16,14 @@
 
 
 # -- Project information -----------------------------------------------------
+from MSPT import __version__
 
 project = 'MSPT'
 copyright = '2021, Loïc Le Grégam'
 author = 'Loïc Le Grégam'
 
 # The full version, including alpha/beta/rc tags
-release = '0.1.0'
+release = __version__
 
 
 # -- General configuration ---------------------------------------------------

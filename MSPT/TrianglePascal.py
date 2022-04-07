@@ -128,6 +128,8 @@ class TPascal:
         else:
             self.logger.info("Experimental ratios have been calculated")
 
+    # TODO: Donner option pour pouvoir plotter aires de deux manips différentes (ancien + nouveau par exemple)
+
     def calculate_mean_ratios(self):
         """
         Get the mean and standard deviation of each isotopologue ratio
@@ -145,7 +147,7 @@ class TPascal:
                 dataframes.append(tmp_df)
         self.df_ready = pd.concat(dataframes)
 
-    def get_isonumbs(self):
+    def get_isonumbs(self, precursor_abundance=0.513):
         """Calculate theoretical abundances of each isotopologue for each metabolite in each sample"""
 
         dataframes = []
@@ -153,7 +155,7 @@ class TPascal:
             for metabolite in self.metabolite_list:
                 tmp_df = self.df_ready[(self.df_ready["sample"] == sample) & (
                         self.df_ready["metabolite"] == metabolite)].copy()
-                abundances = TPascal.get_abundance_list(len(tmp_df["area"]), 0.5)
+                abundances = TPascal.get_abundance_list(len(tmp_df["area"]), precursor_abundance)
                 tmp_df["Theoretical_Ratios"] = abundances
                 # Give the isotopologues the standard M + n format
                 tmp_df["isotopologue"] = [f"M{i}" for i in range(len(tmp_df.metabolite))]
@@ -209,5 +211,5 @@ class TPascal:
                                            "Theoretical_Ratios", "Thresholds", "Bias (%)", "Mean Bias (%)",
                                            "Mean Bias SD (%)"]]
         self.df_ready.to_excel("Results.xlsx", index=False)
-        os.chdir(home)  # Get back to root for stability reasons
+        os.chdir(home)  # Get back to root
         self.logger.info("Results have been generated. Check parent file for Results.xlsx")
