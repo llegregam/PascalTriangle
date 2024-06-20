@@ -216,11 +216,11 @@ class TpN:
         :return:
         """
 
-        try:
-            data = next(iter(button.value))
-        except StopIteration:
-            return f"No file loaded in {button}"
-        data_content = button.value[data]['content']
+        # try:
+        #     data = next(iter(button.value))
+        # except StopIteration:
+        #     return f"No file loaded in {button}"
+        data_content = button.value[0]['content']
         with open('../myfile', 'wb') as f:
             f.write(data_content)
         try:
